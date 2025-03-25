@@ -2,7 +2,7 @@ function myLanguage(code) {
     let buttonIndex = 0; // ボタンごとにユニークなIDを作る
     let variables = {}; // 変数の格納場所
 
-    // 「表示("文字")」を JavaScript に変換
+    // 「表示("文字")」を JavaScript の console.log と HTML への表示に変換
     code = code.replace(/表示\("([^"]+)"\);/g, 'console.log("$1"); document.getElementById("output").innerHTML += "$1<br>";');
 
     // 「表示(変数)」を JavaScript に変換
@@ -26,6 +26,18 @@ function myLanguage(code) {
             return `${varName} = ${value};`;
         }
         return match; // 変換できない場合はそのまま
+    });
+
+    // ボタンの処理（ボタンを作ってイベントを追加）
+    code = code.replace(/ボタン\("(.+)"\) \{([^}]+)\}/g, function(match, btnText, btnAction) {
+        let btnId = "btn" + buttonIndex++;
+        let jsAction = myLanguage(btnAction); // ボタン内のコードも変換
+        return `
+            document.getElementById("output").innerHTML += '<button id="${btnId}">${btnText}</button>';
+            setTimeout(() => {
+                document.getElementById("${btnId}").onclick = function() { ${jsAction} };
+            }, 10);
+        `;
     });
 
     return code;
